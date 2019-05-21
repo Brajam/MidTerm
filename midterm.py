@@ -346,6 +346,13 @@ def print_error(Option,input_txt,type_input,page,error):
 ### FEATURES to provide capabilities on the APIs
 ###
 
+
+# Check Spelling
+def spell_check(txt_input:"text to spellcheck"):
+    tb_text = TextBlob(txt_input)
+    tb_update = tb_text.correct()
+    return("OK","",tb_update)
+  
 # Function to identify descriptors and quantify their appearance on the input file
 def Descriptors(File_name:"Name of the file with the characters"):
     tb_text = TextBlob(File_name)
@@ -459,14 +466,18 @@ def main_topic(txt_input:"text to identify main topic"):
     blob = TextBlob(tekst)
     
     # N-Grams
-    blob_n = blob.ngrams(3)
-    n_list = []
-    for l in blob_n:
-        n_list.append(str(l))
-    n_count = pd.DataFrame({'NGram':n_list})    
-    count_n = n_count['NGram'].value_counts(sort=False).sort_values(ascending=False)
-    
-    return("OK","","The main topic is "+ str(count_n.index[0]))
+
+    if len(lista)<3:
+        return("OK","","The main topic is "+ str(blob))
+    else:
+        blob_n = blob.ngrams(3)
+        n_list = []
+        for l in blob_n:
+            n_list.append(str(l))
+            n_count = pd.DataFrame({'NGram':n_list})    
+            count_n = n_count['NGram'].value_counts(sort=False).sort_values(ascending=False)
+            return("OK","","The main topic is "+ str(count_n.index[0]))
+
 
 
 # definition of the REST API
@@ -488,6 +499,15 @@ app = Flask(__name__)
 
 def main_process():
     results = [
+        {
+          "End Point": "/midterm/SpellCheck",
+          "Description": "Correct spelling mistakes in the input text.",
+          "Parameters" :  {"1. type" : "method used for submitting the file: 'url' or 'str' - Mandatory",
+                           "2. url" : "URL from where to get the file - Optional",
+                           "3.text" : "Text to be proce'ssed if URL is not submited - Optional"
+                           }
+          
+        },
         {
           "End Point": "/midterm/Descriptor",
           "Description": "Identify all the different descriptors and quantify the number of times they appear. The List will be sorted Descending. Available only in English",
@@ -518,11 +538,54 @@ def main_process():
           "Description": "Polarize the text submitted (whole text, sentences or words – based on the request-) with a value between -1 (negative) to 1 (positive). Available only in English.",
           "Parameters" : {"word" : "word",
                            "sentence" : "Sentence",
-                           "whole" : "the whole text"},
+                           "whole" : "the whole text"}
     },
+        {
+          "End Point": "/midterm/MainTopic",
+          "Description": "Identify the main topic of the text submitted by finding the most common sets of words.  Available only in English for stopword removal but can be used for all languages.",
+          "Parameters" : {"1. type" : "method used for submitting the file: 'url' or 'str' - Mandatory",
+                           "2. url" : "URL from where to get the file - Optional",
+                           "3.text" : "Text to be processed if URL is not submited - Optional"
+                           }
+    }
     ]
     return make_response(jsonify(results),200)
 
+
+##################################################################################
+#### Spellcheck End Point
+##################################################################################
+    
+@app.route('/midterm/SpellCheck', methods=['GET'])
+
+def spellcheck_process():
+    
+ 
+    page = request.args.get('url', default= "",type=str)
+    type_input = request.args.get('type', default ="" , type=str)
+    input_txt = request.args.get('text', default ="" , type=str)
+    Option = "SpellCheck"
+
+    if type_input == 'url':
+        result,error, input_txt = getfile(page)
+        if result != "OK":
+            print_error(Option,input_txt,type_input,page,error)
+            return make_response(jsonify({"error":error}), 400)
+        
+    result,error = validations(input_txt,Option)
+
+    if result != "OK":
+        print_error(Option,input_txt,type_input,page,error)
+        return make_response(jsonify({"error":error}), 400)
+
+    result,error,spellcheck_result = spell_check(input_txt)
+
+    result_return = spellcheck_result.to_json(orient='split')
+
+    if result =="OK":
+        return make_response(result_return, 200)
+    else:
+        return make_response(jsonify({"error":error}), 400)
 
 
 ##################################################################################
@@ -834,6 +897,7 @@ class Lemmatize(Resource):
                 lem_space.abort(500, e.__doc__, status = "Could not save information", statusCode = "500")
             except Exception as e:
                 lem_space.abort(400, e.__doc__, status = "Could not save information", statusCode = "400")
+
 
 
 ##

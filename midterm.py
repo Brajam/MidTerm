@@ -301,13 +301,15 @@ def validations(txt_input:"Text to be validated",Option:"Option to be applied",s
         return("NO OK","Option not valid")
     if len(txt_input) > max_txt:
         return("NO OK","Text too big. The total number of admitted characters is "+str(max_txt))
-    if txt_input =="":
+    if txt_input =="" :
         return("NO OK","Input empty")
     else:
         # using Textblob, we identify the language
         tb_text = TextBlob(txt_input)
         lng_txt = tb_text.detect_language()
         if lng_txt == 'en':
+            if Option == "Translate":
+                return ("NO OK", "Input should be a text and in a lengauage different than English")
             err_word = 0
             for word, pos in tb_text.tags:
                 # to validate if the word is valid, we cross it with the dictionary
@@ -315,10 +317,10 @@ def validations(txt_input:"Text to be validated",Option:"Option to be applied",s
                 if ret_word ==[]:
                     err_word = err_word +1
             # we validate the amount of possible Gibberish words agains the system factor
-            if err_word/len(tb_text.tags)>Gib_factor:
+            if len(tb_text.tags) == 0:
+                return ("NO OK","Input doesn't contain actual text")
+            elif err_word/len(tb_text.tags)>Gib_factor:
                 return ("NO OK","Possible Gibberish")
-            if Option == "Translate":
-                return ("NO OK", "Translation only open for other than English")
         elif lng_txt == 'fy':
             return ("NO OK", "Language not supperted/not possible to identify")
         elif lng_txt != "en" and Option != "Translate" and Option != "Identify":

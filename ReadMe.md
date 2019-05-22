@@ -116,12 +116,12 @@ http://<ec2-instance-host>:8080/
 
 You can call the various end points as described in the swagger UI
 
-##Security Considerations
+## Security Considerations
 We have considered the following security problems
 * [Denial-of-service attack](https://en.wikipedia.org/wiki/Denial-of-service_attack) - We have limited the nuber of calls to 5000 per hour for all the calls. And for 3 calls (PartsOfSpeech,
 Subjectivity & Lemmatize) we have been more restrictive and allowed only 60 calls per minute.
 * [Cross-Site Scripting ](https://en.wikipedia.org/wiki/Cross-site_scripting) Since we do not run java script we recieve a "message": 400 in XSS cases 
-* [JSON Security] () - Using newer version of Flask helps close this security vulnerability. 
+* [JSON Security](http://flask.pocoo.org/docs/1.0/security/#json-security) - Using newer version of Flask helps close this security vulnerability. 
 
 ## Built With
 

@@ -27,6 +27,8 @@ from flask import jsonify
 from flask import request
 from flask import make_response
 
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Global variables to be use between functions
 # and system parameters
@@ -485,6 +487,11 @@ def main_topic(txt_input:"text to identify main topic"):
 # definition of the REST API
 app = Flask(__name__)
 
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["5000 per hour"]
+)
 ##################################################################################
 ##################################################################################
 ##################      END POINTS      ##########################################
@@ -790,23 +797,23 @@ pos_space = api.namespace('PartsOfSpeech', description='Pass a string to recogni
 
 @pos_space.route("/pos")
 class PartsOfSpeech(Resource):
+    decorators = [limiter.limit("60/minute")]
+    @api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
+             params={})
+    def get(self):
+        try:
+            return {
+                "instructions": "The sample call to the POST method will take in as input a JSON with an element called input",
+            }
+        except KeyError as e:
+            pos_space.abort(500, e.__doc__, status = "Could not retrieve information", statusCode = "500")
+        except Exception as e:
+            pos_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
 
-	@api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
-			 params={})
-	def get(self):
-		try:
-			return {
-				"instructions": "The sample call to the POST method will take in as input a JSON with an element called input",
-			}
-		except KeyError as e:
-			pos_space.abort(500, e.__doc__, status = "Could not retrieve information", statusCode = "500")
-		except Exception as e:
-			pos_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
-
-	@api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
-			 params={ 'input': 'Specify the input string that needs to be processed' })
-	@api.expect(model)
-	def post(self):
+    @api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
+             params={ 'input': 'Specify the input string that needs to be processed' })
+    @api.expect(model)
+    def post(self):
             try:
                 inputData=request.json['input']
                 wiki = TextBlob(inputData)
@@ -828,23 +835,23 @@ sub_space = api.namespace('Subjectivity', description='Pass a string to reconniz
 
 @sub_space.route("/sub")
 class Subjectivity(Resource):
+    decorators = [limiter.limit("60/minute")]
+    @api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
+             params={})
+    def get(self):
+        try:
+            return {
+                "instructions": "The sample call to the POST method will take in as input a JSON with an element called input",
+            }
+        except KeyError as e:
+            sub_space.abort(500, e.__doc__, status = "Could not retrieve information", statusCode = "500")
+        except Exception as e:
+            sub_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
 
-	@api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
-			 params={})
-	def get(self):
-		try:
-			return {
-				"instructions": "The sample call to the POST method will take in as input a JSON with an element called input",
-			}
-		except KeyError as e:
-			sub_space.abort(500, e.__doc__, status = "Could not retrieve information", statusCode = "500")
-		except Exception as e:
-			sub_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
-
-	@api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
-			 params={ 'input': 'Specify the input string that needs to be processed' })
-	@api.expect(model)
-	def post(self):
+    @api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
+             params={ 'input': 'Specify the input string that needs to be processed' })
+    @api.expect(model)
+    def post(self):
             try:
                 inputData=request.json['input']
                 wiki = TextBlob(inputData)
@@ -866,23 +873,23 @@ lem_space = api.namespace('Lemmatize', description='Pass a string and its words 
 
 @lem_space.route("/lemmatize")
 class Lemmatize(Resource):
+    decorators = [limiter.limit("60/minute")]
+    @api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
+             params={})
+    def get(self):
+        try:
+            return {
+                "instructions": "The sample call to the POST method will take in as input a JSON with an element called input",
+            }
+        except KeyError as e:
+            lem_space.abort(500, e.__doc__, status = "Could not retrieve information", statusCode = "500")
+        except Exception as e:
+            lem_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
 
-	@api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
-			 params={})
-	def get(self):
-		try:
-			return {
-				"instructions": "The sample call to the POST method will take in as input a JSON with an element called input",
-			}
-		except KeyError as e:
-			lem_space.abort(500, e.__doc__, status = "Could not retrieve information", statusCode = "500")
-		except Exception as e:
-			lem_space.abort(400, e.__doc__, status = "Could not retrieve information", statusCode = "400")
-
-	@api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
-			 params={ 'input': 'Specify the input string that needs to be processed' })
-	@api.expect(model)
-	def post(self):
+    @api.doc(responses={ 200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error' },
+             params={ 'input': 'Specify the input string that needs to be processed' })
+    @api.expect(model)
+    def post(self):
             try:
                 inputData=request.json['input']
                 wiki = TextBlob(inputData)

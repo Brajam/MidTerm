@@ -297,6 +297,8 @@ def validations(txt_input:"Text to be validated",Option:"Option to be applied",s
     global Options_list
     global sent_level_list
     
+    decorators = [limiter.limit("60/minute")]
+    
     if Option not in Options_list:
         return("NO OK","Option not valid")
     if Option == "Sentiment" and sent_level not in sent_level_list:

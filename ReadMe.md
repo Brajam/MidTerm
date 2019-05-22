@@ -81,6 +81,9 @@ python3 -m textblob.download_corpora
 pip install flask-restplus
 
 pip install pandas
+
+pip install Flask-Limiter
+
 ```
 We have made the code available in a git repo. Clone to repository and get the code
 
@@ -113,6 +116,12 @@ http://<ec2-instance-host>:8080/
 
 You can call the various end points as described in the swagger UI
 
+## Security Considerations
+We have considered the following security problems
+* [Denial-of-service attack](https://en.wikipedia.org/wiki/Denial-of-service_attack) - We have limited the nuber of calls to 5000 per hour for all the calls. And for 3 calls (PartsOfSpeech,
+Subjectivity & Lemmatize) we have been more restrictive and allowed only 60 calls per minute.
+* [Cross-Site Scripting ](https://en.wikipedia.org/wiki/Cross-site_scripting) Since we do not run java script we recieve a "message": 400 in XSS cases 
+* [JSON Security](http://flask.pocoo.org/docs/1.0/security/#json-security) - Using newer version of Flask helps close this security vulnerability. 
 
 ## Built With
 
@@ -120,6 +129,7 @@ You can call the various end points as described in the swagger UI
 * [Git](https://maven.apache.org/) - Code management
 * [Textblob](https://textblob.readthedocs.io/en/dev/install.html) - Used to create the NLP services
 * [Flask RestPlus](https://flask-restplus.readthedocs.io/en/stable/installation.html) - Generating the Swagger UI
+* [Flask-Limiter](https://flask-limiter.readthedocs.io/en/stable/) - for limiting calls & preventing DDOS attacks
 
 
 ## Acknowledgments & Notes

@@ -509,6 +509,7 @@ limiter = Limiter(
 @app.route('/midterm/main', methods=['GET'])
 
 def main_process():
+    decorators = [limiter.limit("60/minute")]
     results = [
         {
           "End Point": "/midterm/SpellCheck",
